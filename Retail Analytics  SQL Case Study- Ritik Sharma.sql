@@ -1,12 +1,14 @@
-use newschema_rcs; --
+#--------------------------------------Retail Analytics Case Study-----------------------------------------#
+
+use newschema_rcs; 
 
 /*
-Retail Analytics Case Study
 1. Data Problem
 2. Hypothesis
 3. Data Understanding & Cleaning
 4. Analysis (EDA)
 */
+
 
 /* 3. Data Understanding and Data Cleaning*/
 #Learn about the table
@@ -109,9 +111,9 @@ Having Count(*) > 1; -- There is duplicates in sales transaction in transaction 
 -- Insert a data into a dummy table 
 -- drop the actual tble 
 -- rename the dummy table to actual table
-#---------------------------------------------------------------------#
-     -- PART - 2 
 
+#---------------------------------------------------------------------#
+     
 Create Table sales_transaction_nodup as                   -- Create New Table for Distinct Item --
 Select Distinct * from sales_transaction;
 
@@ -224,9 +226,9 @@ Where Location = ''; -- this query worked & replaced all blank cells to unknown 
 Select Count(*) from customer_profiles
 Where Location = '';
 
-/*
-3.7 DATE
-*/
+#---------------------------------------------------------------------------------------#
+
+#-------Analyzing & Cleaning DATE Column---------#
 
 -- 1. Sales Transaction Table
 
@@ -263,7 +265,7 @@ Rename to customer_profiles;
 
 Select * from customer_profiles;
 
--- Setting a primary Key
+#----------------------- Setting a primary Key -----------------------------#
 
 select * from customer_profiles;
 select * from product_inventory;
@@ -285,7 +287,7 @@ Add primary key (TransactionID);
 3. Relationship between the tables -- JOIN
 4. Discripency in the table and price (UPDATE, JOIN and Sub Query)
 5. NULL -- missing values 
-6. DATE FORMATE and update with diff table 
+6. DATE FORMAT and update with diff table 
 */
 
 Select * from customer_profiles;
@@ -298,7 +300,7 @@ Set JoinDate_Updated = str_to_date(JoinDate, '%d/%m/%Y');
 
 select * from customer_profiles;
 
--- EDA
+-- Exploratory Data Analysis
 select * from product_inventory;
 
 Desc customer_profiles;
@@ -324,18 +326,19 @@ FROM Product_inventory
 GROUP BY Category
 Order By sum_stock_level desc;
 
-/* STEP-3
-I want you to do on and do the distribution?
+/* 
+-- I want you to do on and do the distribution?
 
 1. Total Sales Trans
 2. Averga, Revenue or sales
-3. Daily & monthly trend, group by 
-4. top 5 transactions
-5. Number of transactions each costomer
+3. Daily & monthly trend, group by
 */
-Select * from sales_transaction;
 
--- 1. Total revenue, Total Units, Total Transactions
+#---------------------------------------------------------------------------------------#
+
+Select * from sales_transaction;      -- Retrieving the sales transaction table
+
+-- Total revenue, Total Units, Total Transactions
 
 Select 
     Count(TransactionID) as Total_Transactions,
@@ -343,7 +346,9 @@ Select
     Round(Sum(QuantityPurchased * Price), 2) as Total_Revenue
 From Sales_transaction;
 
--- 2. Revenue Distribution by Product
+#---------------------------------------------------------------------------------------#
+
+-- Revenue Distribution by Product
 
 Select 
     ProductID,
@@ -353,7 +358,9 @@ From Sales_transaction
 Group By ProductID
 Order By Total_Revenue DESC;
 
--- 3. Revenue Distribution by Customer
+#---------------------------------------------------------------------------------------#
+
+-- Revenue Distribution by Customer
 
 Select 
     CustomerID,
@@ -364,7 +371,9 @@ From Sales_transaction
 Group By CustomerID
 Order By Total_Revenue DESC;
 
--- 4. Transactions Count by Date (Daily Trend)
+#---------------------------------------------------------------------------------------#
+
+-- Transactions Count by Date (Daily Trend)
 
 Select 
     Transaction_Date_Updated,
@@ -375,7 +384,9 @@ From Sales_transaction
 Group By Transaction_Date_Updated
 Order By Transaction_Date_Updated;
 
--- 5) Monthly Sales Distribution
+#---------------------------------------------------------------------------------------#
+
+-- Monthly Sales Distribution
 
 Select 
     date_format(Transaction_Date_Updated, '%Y-%m') as Month,
@@ -386,7 +397,9 @@ From Sales_transaction
 Group By Month
 Order By Month;
 
--- 6) Top 5 Products by Revenue
+#---------------------------------------------------------------------------------------#
+
+-- Products by Revenue
 
 Select 
    ProductID,
@@ -396,7 +409,7 @@ Group by ProductID
 Order By total_revenue DESC
 Limit 5;
 
--- 7) Repeat Customers (Customers who purchased more than 1 time)
+-- Repeat Customers (Customers who purchased more than 1 time)
 
 Select 
     CustomerID, ProductID,
@@ -416,7 +429,7 @@ From (
      having Count(TransactionID) > 1
 	 ) t;
 
--- 8) Transaction Value Distribution (Low, Medium, High)
+-- Transaction Value Distribution (Low, Medium, High)
 Select
     Case 
        When (QuantityPurchased * Price) < 500 Then 'Low'
@@ -427,14 +440,20 @@ Select
 From Sales_transaction
 Group by Order_value_bucket;
 
--- 9) Price Distribution (Min, Max, Avg Price)
+#---------------------------------------------------------------------------------------#
+
+-- Price Distribution (Min, Max, Avg Price)
+
 Select
     Round(Max(Price), 2) as Max_Price,
     Round(Min(Price), 2) as Min_Price,
     Round(Avg(Price), 2) as Avg_Price
 From sales_transaction;
 
--- 10) Category-wise Distribution (If you have products table)
+#---------------------------------------------------------------------------------------#
+
+-- Category-wise Distribution (If you have products table)
+
 Select 
     pi.Category,
     sum(st.QuantityPurchased) as total_units,
@@ -445,8 +464,9 @@ On st.ProductID = pi.ProductID
 Group By pi.Category
 Order By total_revenue desc;
 
-/*Step5 : 
-Get a summary of total sales and quantities sold per product.*/
+#---------------------------------------------------------------------------------------#
+
+-- Get a summary of total sales and quantities sold per product.
 
 Select 
     pi.Category,
@@ -458,9 +478,9 @@ Join Product_inventory pi
 On st.ProductID = pi.ProductID
 Group By pi.Category, pi.ProductName;
 
-/*step-5 comments
-this is showing the category wise total sales and total purchase
-*/
+#---------------------------------------------------------------------------------------#
+
+-- Calculate the category wise total sales and total purchase
 
 Select 
     pi.Category,
@@ -473,8 +493,10 @@ On st.ProductID = pi.ProductID
 Group By pi.Category
 order by total_sales desc; -- category wise only
 
-/*Step6 : Customer Purchase Frequency
-*/
+#---------------------------------------------------------------------------------------#
+
+-- Customer Purchase Frequency
+
 select * from sales_transaction;
 
 Select 
@@ -484,8 +506,9 @@ From Sales_transaction
 Group By CustomerID
 Order By Total_transaction desc;
 
-/*Step 7 : Product Categories Performance
-*/
+#---------------------------------------------------------------------------------------#
+
+-- Product Categories Performance
 
 Select 
     pi.Category,
@@ -498,7 +521,10 @@ On st.ProductID = pi.ProductID
 Group By pi.Category
 order by total_sales desc;
 
-/*Step 8 :  High Sales Products  top 10 -- top 5*/ 
+#---------------------------------------------------------------------------------------#
+
+ -- High Sales Products  top 10 -- top 5 
+ 
 Select 
    ProductID,
    Round(Sum(QuantityPurchased * Price), 2) as total_sales
@@ -507,7 +533,10 @@ Group by ProductID
 Order By total_sales DESC
 Limit 5;
 
-/*Step 9 : Low Sales Products*/
+#---------------------------------------------------------------------------------------#
+
+-- Low Sales Products
+
 Select 
    ProductID,
    Round(Sum(QuantityPurchased * Price), 2) as total_sales
@@ -516,7 +545,9 @@ Group by ProductID
 Order By total_sales
 Limit 5;
 
-/*Step 10 : Sales Trends */
+#---------------------------------------------------------------------------------------#
+
+-- Sales Trends
 
 Select 
     Year(Transaction_Date_Updated) as Years,
@@ -526,10 +557,12 @@ Select
 From Sales_transaction
 Group By Years, Months;
 
-/* Step 11. Growth rate of sales M-o_M 
-Write a SQL query to understand the month on month growth rate of sales of the company 
-which will help understand the growth trend of the company.
-*/
+#---------------------------------------------------------------------------------------#
+
+-- Growth rate of sales M-o_M 
+
+-- Write a SQL query to understand the month on month growth rate of sales of the company 
+-- which will help understand the growth trend of the company.
 
 -- (Current-Previous/Previous) * 100
 
@@ -549,7 +582,7 @@ Select
 From Monthly_sales
 Order By Monthh; -- -- (Current-Previous/Previous) * 100 
 
--- Using Sub Query
+-- Using Sub Query --
 
 Select 
     Monthh,
@@ -569,10 +602,10 @@ Order By Monthh;
 
 #---------------------------------------------------------------------------------------#
 
-/* 
-Q12. Customers - High Purchase Frequency and Revenue
-Frequency > 10, Revenue > 1500
-*/
+-- Customers - High Purchase Frequency and Revenue
+
+-- Frequency > 10, Revenue > 1500 (assumed)
+
 Select * from sales_transaction;
 
 Select CustomerID, 
@@ -585,9 +618,10 @@ order by Purchase_Frequency Desc;
 
 #---------------------------------------------------------------------------------------#
 
-/*Step 13 : 13. Occasional Customers - Low Purchase Frequency
-Frequency < 10 or 2 or 3 
-*/
+-- Occasional Customers - Low Purchase Frequency
+
+-- Frequency < 10 or 2 or 3 (assumed)
+
 Select * from sales_transaction;
 
 Select CustomerID, 
@@ -598,9 +632,9 @@ group by CustomerID
 Having Purchase_Frequency <= 2 -- we can modify it by replacing values
 order by Purchase_Frequency Desc;
 
-/*
-Step 14: Repeat Purchase Patterns
-*/
+#---------------------------------------------------------------------------------------#
+
+-- Repeat Purchase Patterns
 
 Select * from sales_transaction;
 
@@ -617,7 +651,10 @@ Group by CustomerID
 Having Count_of_products > 1
 order by Count_of_products DESC; 
 
-/*Step 15 : Loyalty Indicators */
+#---------------------------------------------------------------------------------------#
+
+-- Loyalty Indicators
+
 Select * from sales_transaction;
 
 With Tran_date As (
@@ -636,8 +673,10 @@ Group by CustomerID
 Having DayBetween > 365
 order by DayBetween DESC;
 
-/*16. Customer Segmentation based on quantity purchased  (31156)-(31554)
-*/
+#---------------------------------------------------------------------------------------#
+
+-- Customer Segmentation based on quantity purchased  (31156)-(31554)
+
 Select * from sales_transaction;
 
 Create Table Cust_Segment AS
@@ -658,6 +697,8 @@ From (
     Select Count(*), Customer_Segment from Cust_Segment
     Group By Customer_Segment;
     
+#Created view function below (for simplifying complex data)
+
 Create View Vw_Customer_Segment AS
 Select CustomerID,
        Case 
@@ -677,15 +718,11 @@ From (
     
 Select * from Vw_Customer_Segment;
 
-#----------------------- Example for inserting value and showing LIVE Connection in MySQL to PowerBi Server ------------------------------#
-Select * from customer_profiles;
-Insert into customer_profiles(CustomerID, Age, Gender, Location, JoinDate, JoinDate_Updated)
-Values(1001, 5, 'Others', 'West', '01/01/23', '2023-01-01');
+#---------------------------------------------------------------------------------------#
 
-    
-/*Step-17: Sales Contribution by Top 20% Customers (Pareto Principle)
-Find what portion of a  revenue is coming from top spenders.
-*/
+-- Sales Contribution by Top 20% Customers (Pareto Principle)
+
+-- Find what portion of a  revenue is coming from top spenders.
 
 Select * from sales_transaction;
 
@@ -709,10 +746,12 @@ Select CustomerID,
 From ranked
 Where (running_sales / Overall_sales) <= 0.20;
 
+#---------------------------------------------------------------------------------------#
 
-/*Step-18: Basket Size Analysis (Avg Items per Transaction)
-Understand how many items are typically purchased per transaction.
-*/
+-- Basket Size Analysis (Avg Items per Transaction)
+
+-- Understand how many items are typically purchased per transaction.
+
 Select * from sales_transaction;
 
 Select
@@ -731,14 +770,16 @@ From (
       Group by TransactionID
       ) as t; -- overall average_basket_size
 
-#-------------------------------------------------------------------------------#
+#---------------------------------------------------------------------------------------#
 
-/*Step-19: RFM (Recency, Frequency, Monetory) Preparation
-Prepares for customer segmentation using RFM logic
-Recency- days since last purchase
-Frequency- total transaction by customer
-Monetary- total money spent by customer
-*/
+#RFM Analysis
+
+-- RFM (Recency, Frequency, Monetory) Preparation
+-- Prepares for customer segmentation using RFM logic
+-- Recency- days since last purchase
+-- Frequency- total transaction by customer
+-- Monetary- total money spent by customer
+
 Select * from sales_transaction; 
 Select * from product_inventory;
 Select * from customer_profiles;
@@ -768,12 +809,11 @@ SELECT
 FROM rfm_logic
 ORDER BY Monetary DESC;
 
-#----------------------------------------------------------------------# 
+#---------------------------------------------------------------------------------------#
 
-/*
-Q20) Time-of-Day or Hourly Sales Trend 
-Adds Behvioral insight if your datetime has a time component
-*/
+-- Time-of-Day or Hourly Sales Trend 
+
+-- Adds Behvioral insight if your datetime has a time component
 
 Select 
     Hour(transaction_datetime) as Sales_hour,
